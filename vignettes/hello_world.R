@@ -13,7 +13,7 @@ fields = 'record_uuid,session_id,event_type,record_save_time,participant_id,reco
 # if `fields` ^^^ contains records, you will receive a URL to download the file.
 # remove records from `fields` ^^^^ to get ids
 
-study = 'Gabby 1st Year Project'
+experiment = 'Gabby 1st Year Project'
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -24,7 +24,7 @@ api_token = get_auth_token()
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # query database for given data
-api_result = query_study_ddb(study=study,
+api_result = query_study_ddb(study=experiment,
                              token=api_token,
                              fields=fields)
 
@@ -42,7 +42,8 @@ df_unnest = unnest_jspsych_data(df)
 df_pp = df_unnest %>%
   mutate(flag_is_risky = grepl("this risky", stimulus_clean)) %>%
   mutate(flag_is_pollutant = grepl("this a pollutant", stimulus_clean)) %>%
-  separate(col=stimulus_clean, sep="\\?", into=c("prompt", "word"))
+  separate(col=stimulus_clean, sep="\\?", into=c("prompt", "word")) %>%
+  distinct()
 
 # derive study condition
 df_debrief = df_pp %>%
@@ -52,7 +53,25 @@ df_debrief = df_pp %>%
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-# visualize reaction time and overall response bias ----
+# aggregates
+agg_participant = df_pp %>%
+  group_by(participant_id) %>%
+  summarise(mean_rt = mean(rt, na.rm=T),
+            sd_rt = sd(rt, na.rm=T),
+            n = n())
+
+# get aggregates by prompt
+agg_participant_prompt = df_pp %>%
+  filter(prompt != "+") %>%
+  filter(!grepl("Completion Code",prompt)) %>%
+  group_by(participant_id, prompt) %>%
+  summarise(mean_rt = mean(rt, na.rm=T),
+            median_rt = median(rt, na.rm=T),
+            max_rt = max(rt, na.rm=T),
+            sd_rt = sd(rt, na.rm=T),
+            n = n())
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # create filtered dataset
 df_filt =  df_pp %>%
@@ -60,6 +79,9 @@ df_filt =  df_pp %>%
   filter(task_section != "instructions") %>%
   filter(task_section != "debriefing")
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# visualize reaction time and overall response bias ----
 ggplot(df_filt, aes(rt)) + geom_histogram() + theme_bw()
 ggplot(df_filt, aes(response)) + geom_histogram() + theme_bw()
 

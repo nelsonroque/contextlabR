@@ -13,19 +13,20 @@ fields = 'record_uuid,session_id,event_type,record_save_time,participant_id,reco
 # if `fields` ^^^ contains records, you will receive a URL to download the file.
 # remove records from `fields` ^^^^ to get ids
 
-experiment = 'Gabby 1st Year Project'
+study = 'Gabby 1st Year Project'
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # run code below to open browser and save auth token ----
+# enter the token into the `Console` below.
 api_token = get_auth_token()
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # query database for given data
-api_result = query_study_ddb(study=experiment,
-                       token=api_token,
-                       fields=fields)
+api_result = query_study_ddb(study=study,
+                             token=api_token,
+                             fields=fields)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -41,22 +42,32 @@ df_unnest = unnest_jspsych_data(df)
 df_pp = df_unnest %>%
   mutate(flag_is_risky = grepl("this risky", stimulus_clean)) %>%
   mutate(flag_is_pollutant = grepl("this a pollutant", stimulus_clean)) %>%
-  separate(col=stimulus_clean, sep="\\?", into=c("prompt", "word")) %>%
-  filter(task_section != "fixation") %>%
-  filter(task_section != "instructions") %>%
-  filter(task_section != "debriefing")
+  separate(col=stimulus_clean, sep="\\?", into=c("prompt", "word"))
+
+# derive study condition
+df_debrief = df_pp %>%
+  filter(task_section == "debriefing") %>%
+  mutate(completion_code = substr(prompt, 16,20)) %>%
+  mutate(study_condition = ifelse(completion_code == "01234", "is_risky", "is_pollutant"))
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # visualize reaction time and overall response bias ----
-ggplot(df_pp, aes(rt)) + geom_histogram() + theme_bw()
-ggplot(df_pp, aes(response)) + geom_histogram() + theme_bw()
+
+# create filtered dataset
+df_filt =  df_pp %>%
+  filter(task_section != "fixation") %>%
+  filter(task_section != "instructions") %>%
+  filter(task_section != "debriefing")
+
+ggplot(df_filt, aes(rt)) + geom_histogram() + theme_bw()
+ggplot(df_filt, aes(response)) + geom_histogram() + theme_bw()
 
 # visualize one word ----
-propane_rt = ggplot(df_pp %>% filter(word == "propane"), aes(rt)) +
+propane_rt = ggplot(df_filt %>% filter(word == "propane"), aes(rt)) +
   geom_histogram() +
   theme_bw()
-propane_response = ggplot(df_pp %>% filter(word == "propane"), aes(response)) +
+propane_response = ggplot(df_filt %>% filter(word == "propane"), aes(response)) +
   geom_histogram() +
   theme_bw()
 cowplot::plot_grid(propane_response, propane_rt)

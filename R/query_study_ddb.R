@@ -3,7 +3,7 @@
 #' @importFrom httr VERB
 #' @importFrom jsonlite fromJSON
 query_study_ddb <- function(db="dynamodb",
-                            api="https://n1dlcfeo2l.execute-api.us-east-1.amazonaws.com/api/query",
+                            api=NA,
                             study=NA,
                             token=NA,
                             fields=NA) {

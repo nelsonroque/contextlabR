@@ -2,7 +2,7 @@
 #' @export
 #' @importFrom httr VERB
 #' @importFrom jsonlite fromJSON
-get_unnest_s3 <- function(api="", token = NA, experiment=NA, fields=NA) {
+get_unnest_s3 <- function(api=NA, token = NA, experiment=NA, fields=NA) {
 
   # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

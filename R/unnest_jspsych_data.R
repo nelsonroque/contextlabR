@@ -14,10 +14,15 @@ unnest_jspsych_data = function(df) {
   # clean datastack (reorder cols, remove any cols with repeating vals)
   datastack_clean = datastack %>%
     select(participant_id, session_uuid,
-           task_section, trial_type, trial_index,
+           task_section,
+           trial_type, trial_index,
            experiment_label, experiment_name,
            stimulus,
            rt, response,
+           key_press,
+           button_pressed,
+           correct,
+           time_elapsed,
            experiment_trial_timeout, slider_start) %>%
     mutate(stimulus_clean = gsub("<.*?>", "", stimulus))
 

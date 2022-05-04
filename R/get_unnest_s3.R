@@ -59,7 +59,7 @@ get_unnest_s3 <- function(api=NA, token = NA, experiment=NA, fields=NA) {
   # transform step: from json in a single cell, to a tabular dataset ----
   df_unnest = unnest_trials(df)
 
-  # pre-process dataset to remove task_sections not of interest ----
+  # pre-process dataset to remove exact duplicates ----
   df_pp = df_unnest %>%
     distinct()
 

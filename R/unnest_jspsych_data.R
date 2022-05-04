@@ -28,10 +28,3 @@ unnest_jspsych_data = function(df) {
 
   return(datastack_clean)
 }
-
-# TODO: write function to unstack full dataset
-# i.e., for each row, unstack the records object
-# like the `single_record` above
-
-# TODO: remove html from `stimulus` column and split
-# prompt and word

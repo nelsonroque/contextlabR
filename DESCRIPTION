@@ -1,7 +1,7 @@
 Package: contextlabR
 Type: Package
 Title: A collection of utilities for the Context Lab at UCF.
-Version: 0.0.4
+Version: 0.0.5
 Author: Nelson Roque, PhD
 Maintainer: Nelson Roque, PhD <nelson.roque@ucf.edu>
 Description: Authenticate and query ContextLab AWS resources.

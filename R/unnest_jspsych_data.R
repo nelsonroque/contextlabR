@@ -23,6 +23,7 @@ unnest_jspsych_data = function(df) {
            button_pressed,
            correct,
            time_elapsed,
+           record_save_time,
            experiment_trial_timeout, slider_start) %>%
     mutate(stimulus_clean = gsub("<.*?>", "", stimulus))
 
